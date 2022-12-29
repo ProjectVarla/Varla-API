@@ -1,21 +1,20 @@
-import json
-from fastapi import APIRouter, HTTPException
+from typing import List
+
+from fastapi import APIRouter
 from jsql import sql
-from utility.context import request_global, g
-from typing import List, Optional
+from Models import Task, Todo
 
-from ..model.Task import Task
-from ..model.Todo import Todo
+from Utility.context import g
 
-
-retrieve = APIRouter(prefix="/tasks",tags=["Tasks"])
+retrieve = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @retrieve.post("/get/tasks", response_model=List[Task.Object])
-def get_tasks(filter:Task.Filter): 
-   
-    tasks = sql(g().conn,
-        '''
+def get_tasks(filter: Task.Filter):
+
+    tasks = sql(
+        g().conn,
+        """
             SELECT 
                 *
             FROM 
@@ -24,16 +23,19 @@ def get_tasks(filter:Task.Filter):
                 {% if id %}             AND id = :id                    {% endif %}
                 {% if title %}          AND title LIKE "%{{title}}%"    {% endif %}
                 {% if description %}    AND description = :description  {% endif %}
-                {% if is_archived %}    AND archived = :is_archived     {% endif %}
-                
-        ''',**filter.dict()).dicts()
+                AND archived = :is_archived
+        """,
+        **filter.dict()
+    ).dicts()
 
     return tasks
 
+
 @retrieve.post("/get/todos", response_model=List[Todo.Object])
-def get_todos(filter:Todo.Filter):
-    todos = sql(g().conn,
-        '''
+def get_todos(filter: Todo.Filter):
+    todos = sql(
+        g().conn,
+        """
             SELECT 
                 *
             FROM 
@@ -43,7 +45,8 @@ def get_todos(filter:Todo.Filter):
                 {% if task_id %}        AND task_id = :task_id        {% endif %}
                 {% if text %}           AND text LIKE "%{{text}}%"    {% endif %}
                 {% if is_pinned %}      AND pinned = :is_pinned       {% endif %}
-                {% if is_archived %}    AND archived = :is_archived   {% endif %}
-                
-        ''',**filter.dict()).dicts()
+                AND archived = :is_archived 
+        """,
+        **filter.dict()
+    ).dicts()
     return todos

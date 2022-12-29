@@ -1,5 +1,7 @@
-from fastapi import Header,status,HTTPException
 from os import getenv
+
+from fastapi import Header, HTTPException, status
+
 SECRET = getenv("SECRET")
 MODE = getenv("MODE")
 
