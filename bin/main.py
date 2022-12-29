@@ -53,6 +53,11 @@ async def startup_event():
     Varla.info("Varla-API is up!")
 
 
+@app.on_event("shutdown")
+def shutdown_event():
+    Varla.info("Varla-API is down!")
+
+
 app.include_router(TaskRetrieve, prefix="/api")
 app.include_router(TaskInsert, prefix="/api")
 app.include_router(TaskUpdate, prefix="/api")
