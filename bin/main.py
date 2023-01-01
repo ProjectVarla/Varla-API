@@ -9,7 +9,8 @@ from sqlalchemy import create_engine
 from Utility.authentication import assert_secret
 from Utility.context import g, request_global
 from VarlaLib import Varla, Verbosity
-
+from VarlaLib.Shell import varla_header
+from conf import settings
 
 load_dotenv()
 
@@ -50,12 +51,12 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.on_event("startup")
 async def startup_event():
-    Varla.info("Varla-API is up!")
+    Varla.info(f"{settings.APP_NAME} is up!")
 
 
 @app.on_event("shutdown")
 def shutdown_event():
-    Varla.info("Varla-API is down!")
+    Varla.info(f"{settings.APP_NAME} is down!")
 
 
 app.include_router(TaskRetrieve, prefix="/api")
@@ -64,4 +65,11 @@ app.include_router(TaskUpdate, prefix="/api")
 app.include_router(TaskDelete, prefix="/api")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=PORT, reload=bool(MODE == "DEV"))
+    varla_header()
+
+    uvicorn.run(
+        "main:app",
+        host=settings.API_HOST,
+        port=settings.API_PORT,
+        reload=bool(MODE == "DEV"),
+    )
