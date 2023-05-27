@@ -1,11 +1,7 @@
-from os import getenv
-
 from fastapi import Header, HTTPException, status
-
-SECRET = getenv("SECRET")
-MODE = getenv("MODE")
+from conf import settings
 
 
 def assert_secret(x_secret=Header(default=None)):
-    if MODE != "DEV" and x_secret != SECRET:
+    if not settings.DEV_MODE and x_secret != settings.SECRET:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
