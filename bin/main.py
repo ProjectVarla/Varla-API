@@ -2,27 +2,18 @@ from os import getenv
 from types import SimpleNamespace
 
 import uvicorn
+from APIs import WalletRetrieve
 from APIs.Tasks import TaskDelete, TaskInsert, TaskRetrieve, TaskUpdate
-from dotenv import load_dotenv
+from conf import settings
 from fastapi import Depends, FastAPI, Request
 from sqlalchemy import create_engine
 from Utility.authentication import assert_secret
 from Utility.context import g, request_global
 from VarlaLib import Varla, Verbosity
 from VarlaLib.Shell import varla_header
-from conf import settings
-
-load_dotenv()
-
-DATABASE_NAME = getenv("DATABASE_NAME")
-DATABASE_PASSWORD = getenv("DATABASE_PASSWORD")
-DATABASE_USER = getenv("DATABASE_USER")
-DATABASE_HOST = getenv("DATABASE_HOST")
-PORT = int(getenv("API_PORT"))
-MODE = getenv("MODE")
 
 engine = create_engine(
-    f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
+    f"mysql+mysqlconnector://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}/{settings.DATABASE_NAME}"
 )
 
 app = FastAPI(dependencies=[Depends(assert_secret)], title="Varla-API")
@@ -64,6 +55,9 @@ app.include_router(TaskInsert, prefix="/api")
 app.include_router(TaskUpdate, prefix="/api")
 app.include_router(TaskDelete, prefix="/api")
 
+app.include_router(WalletRetrieve, prefix="/api")
+
+
 if __name__ == "__main__":
     varla_header()
 
@@ -71,5 +65,5 @@ if __name__ == "__main__":
         "main:app",
         host=settings.API_HOST,
         port=settings.API_PORT,
-        reload=bool(MODE == "DEV"),
+        reload=settings.DEV_MODE,
     )
